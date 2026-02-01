@@ -550,41 +550,43 @@ func (sm *telnetStateMachine) handleCommand(r *Redirector) {
 	opt := sm.commandBuf[2]
 	switch cmd {
 	case TNWILL:
-		if opt == TNCOM_PORT_OPTION {
+		switch opt {
+		case TNCOM_PORT_OPTION:
 			r.logf("Telnet COM Port Control Enabled (WILL).")
 			r.tcpcEnabled = true
 			if !sm.tnOpts[opt].sentDo {
 				r.sendTelnetOption(TNDO, opt)
 			}
 			sm.tnOpts[opt].isDo = true
-		} else if opt == TN_TRANSMIT_BINARY || opt == TN_SUPPRESS_GO_AHEAD {
+		case TN_TRANSMIT_BINARY, TN_SUPPRESS_GO_AHEAD:
 			if !sm.tnOpts[opt].sentDo {
 				r.sendTelnetOption(TNDO, opt)
 			}
 			sm.tnOpts[opt].isDo = true
-		} else {
+		default:
 			r.sendTelnetOption(TNDONT, opt)
 			sm.tnOpts[opt].isDo = false
 		}
 		sm.tnOpts[opt].sentDo = false
 
 	case TNDO:
-		if opt == TNCOM_PORT_OPTION {
+		switch opt {
+		case TNCOM_PORT_OPTION:
 			r.logf("Telnet COM Port Control Enabled (DO).")
 			r.tcpcEnabled = true
 			if !sm.tnOpts[opt].sentWill {
 				r.sendTelnetOption(TNWILL, opt)
 			}
 			sm.tnOpts[opt].isWill = true
-		} else if opt == TN_TRANSMIT_BINARY || opt == TN_SUPPRESS_GO_AHEAD {
+		case TN_TRANSMIT_BINARY, TN_SUPPRESS_GO_AHEAD:
 			if !sm.tnOpts[opt].sentWill {
 				r.sendTelnetOption(TNWILL, opt)
 			}
 			sm.tnOpts[opt].isWill = true
-		} else if opt == TN_ECHO {
+		case TN_ECHO:
 			r.sendTelnetOption(TNWILL, opt)
 			sm.tnOpts[opt].isWill = true
-		} else {
+		default:
 			r.sendTelnetOption(TNWONT, opt)
 			sm.tnOpts[opt].isWill = false
 		}
