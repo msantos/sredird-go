@@ -112,6 +112,8 @@ type Redirector struct {
 }
 
 // New creates a new Redirector with the provided configuration.
+// The returned struct contains state for the redirector session and
+// should not be reused or shared between goroutines.
 func New(cfg Config) *Redirector {
 	logger := cfg.Logger
 	if logger == nil {
