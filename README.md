@@ -1,3 +1,5 @@
+[![Go Reference](https://pkg.go.dev/badge/go.iscode.ca/sredird.svg)](https://pkg.go.dev/go.iscode.ca/sredird)
+
 # SYNOPSIS
 
 sredird *option* *loglevel* *device* [*pollinginterval*]
