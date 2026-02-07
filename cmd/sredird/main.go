@@ -1,3 +1,6 @@
+// sredird is an RFC 2217 compliant serial port redirector which maps a
+// network port to a serial device. Serial port parameters are configured
+// using an extension to the telnet protocol.
 package main
 
 import (
