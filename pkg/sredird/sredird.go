@@ -1,3 +1,6 @@
+// Package sredird creates an RFC 2217compliant serial port redirector
+// service, mapping a network port to a serial device. The serial port
+// parameters can be configured using an extension to the telnet protocol.
 package sredird
 
 import (
