@@ -156,7 +156,7 @@ func (r *Redirector) Run(ctx context.Context, netReader io.Reader, netWriter io.
 	// 2. Save initial settings
 	r.initialPortSettings, err = getTermios(r.deviceFd)
 	if err != nil {
-		unix.Close(r.deviceFd)
+		_ = unix.Close(r.deviceFd)
 		return fmt.Errorf("tcgetattr failed: %w", err)
 	}
 
@@ -434,7 +434,7 @@ func (r *Redirector) signalActivity() {
 
 func (r *Redirector) restoreSettings() {
 	if r.deviceFd >= 0 && r.initialPortSettings != nil {
-		setTermios(r.deviceFd, r.initialPortSettings)
+		_ = setTermios(r.deviceFd, r.initialPortSettings)
 	}
 }
 
@@ -464,7 +464,7 @@ func (r *Redirector) setupSerialPort(fd int) error {
 	flags, err := unix.FcntlInt(uintptr(fd), unix.F_GETFL, 0)
 	if err == nil {
 		flags &^= unix.O_NONBLOCK
-		unix.FcntlInt(uintptr(fd), unix.F_SETFL, flags)
+		_, _ = unix.FcntlInt(uintptr(fd), unix.F_SETFL, flags)
 	} else {
 		r.logf("Unable to reset device to non blocking mode, ignoring: %v", err)
 	}
@@ -782,11 +782,11 @@ func setTermios(fd int, term *unix.Termios) error {
 }
 
 func tcflush(fd int, queue int) {
-	unix.IoctlSetInt(fd, unix.TCFLSH, queue)
+	_ = unix.IoctlSetInt(fd, unix.TCFLSH, queue)
 }
 
 func unix_tcsendbreak(fd int, duration int) {
-	unix.IoctlSetInt(fd, unix.TCSBRK, duration)
+	_ = unix.IoctlSetInt(fd, unix.TCSBRK, duration)
 }
 
 // -----------------------------------------------------------------------------
@@ -886,7 +886,7 @@ func setPortSpeed(fd int, baud uint32) {
 	if err == nil {
 		t.Cflag &^= unix.CBAUD
 		t.Cflag |= speed
-		setTermios(fd, t)
+		_ = setTermios(fd, t)
 	}
 }
 
@@ -926,7 +926,7 @@ func setPortDataSize(fd int, size byte) {
 	default:
 		t.Cflag |= unix.CS8
 	}
-	setTermios(fd, t)
+	_ = setTermios(fd, t)
 }
 
 func getPortParity(fd int) byte {
@@ -959,7 +959,7 @@ func setPortParity(fd int, parity byte) {
 	default:
 		t.Cflag &^= unix.PARENB
 	}
-	setTermios(fd, t)
+	_ = setTermios(fd, t)
 }
 
 func getPortStopSize(fd int) byte {
@@ -983,7 +983,7 @@ func setPortStopSize(fd int, size byte) {
 	} else {
 		t.Cflag &^= unix.CSTOPB
 	}
-	setTermios(fd, t)
+	_ = setTermios(fd, t)
 }
 
 func (r *Redirector) getPortFlowControl(which byte) byte {
@@ -1048,8 +1048,8 @@ func setPortFlowControl(fd int, how byte) {
 	case 12: // RTS Off
 		lines &^= unix.TIOCM_RTS
 	}
-	setTermios(fd, t)
-	unix.IoctlSetInt(fd, unix.TIOCMSET, lines)
+	_ = setTermios(fd, t)
+	_ = unix.IoctlSetInt(fd, unix.TIOCMSET, lines)
 }
 
 func getModemState(fd int, pmState uint8) uint8 {
