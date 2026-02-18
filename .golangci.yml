@@ -1,0 +1,10 @@
+version: "2"
+linters:
+  disable:
+    #- errcheck
+    - revive
+  exclusions:
+    rules:
+      - path: '(.+)_test\.go'
+        linters:
+          - errcheck
