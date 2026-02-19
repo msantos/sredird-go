@@ -213,7 +213,7 @@ func TestTelnetState_NormalData(t *testing.T) {
 	// Drain channel
 	timeout := time.After(100 * time.Millisecond)
 	var output []byte
-	for i := 0; i < len(input); i++ {
+	for range input {
 		select {
 		case b := <-r.devWriteChan:
 			output = append(output, b...)

@@ -180,40 +180,30 @@ func (r *Redirector) Run(ctx context.Context, netReader io.Reader, netWriter io.
 	defer cancel() // Ensure child goroutines stop if Run returns
 
 	// Network Reader
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		r.networkReader(ctx, netReader)
-	}()
+	})
 
 	// Network Writer
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		r.networkWriter(ctx, netWriter)
-	}()
+	})
 
 	// Device Reader
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		r.deviceReader(ctx)
-	}()
+	})
 
 	// Device Writer
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		r.deviceWriter(ctx)
-	}()
+	})
 
 	// Modem Poller
 	if r.cfg.PollInterval > 0 {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			r.modemPoller(ctx, time.Duration(r.cfg.PollInterval)*time.Millisecond)
-		}()
+		})
 	}
 
 	// 6. Initial Telnet Negotiation
@@ -280,7 +270,7 @@ func (r *Redirector) networkReader(ctx context.Context, reader io.Reader) {
 			n, err := reader.Read(buf)
 			if n > 0 {
 				r.signalActivity()
-				for i := 0; i < n; i++ {
+				for i := range n {
 					r.tnState.feed(r, buf[i])
 				}
 			}
@@ -345,7 +335,7 @@ func (r *Redirector) deviceReader(ctx context.Context) {
 			if n > 0 {
 				r.signalActivity()
 				var out []byte
-				for i := 0; i < n; i++ {
+				for i := range n {
 					c := buf[i]
 					if c == TNIAC {
 						out = append(out, TNIAC, TNIAC)
@@ -411,7 +401,7 @@ func (r *Redirector) modemPoller(ctx context.Context, interval time.Duration) {
 // Helpers
 // -----------------------------------------------------------------------------
 
-func (r *Redirector) logf(format string, v ...interface{}) {
+func (r *Redirector) logf(format string, v ...any) {
 	if r.log != nil {
 		r.log.Printf(format, v...)
 	}
